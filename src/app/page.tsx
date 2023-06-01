@@ -5,11 +5,6 @@ import { Routes } from "../components/Routes";
 import fs from "fs/promises";
 import iconv from "iconv-lite";
 
-export const writeFileShiftJIS = (filePath: string, data: string) => {
-  const buf = iconv.encode(data, "Shift_JIS");
-  return fs.writeFile(filePath, buf);
-};
-
 dayjs.locale("ja");
 
 export default function Home(props: {
@@ -59,14 +54,15 @@ export default function Home(props: {
       .flat()
       .join("\n");
 
-    await writeFileShiftJIS(
-      "./hoge.csv",
-      [
-        "allocation_date",
-        "9999/12/31,定期,この行は読み込まれません",
-        result,
-      ].join("\n")
-    );
+    const filePath = "./data.csv";
+    const data = [
+      "allocation_date",
+      "9999/12/31,定期,この行は読み込まれません",
+      result,
+    ].join("\n");
+
+    const buf = iconv.encode(data, "Shift_JIS");
+    fs.writeFile(filePath, buf);
   }
 
   return (
