@@ -78,6 +78,9 @@ export const Routes = (props: {
             </div>
           );
         })}
+        <p className="text-sm text-right text-gray-700">
+          往復は自動保管されるため片道のみ入力してください。
+        </p>
       </fieldset>
     </div>
   );
