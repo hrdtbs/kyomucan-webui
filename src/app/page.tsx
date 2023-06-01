@@ -1,11 +1,8 @@
-import dayjs from "dayjs";
-import "dayjs/locale/ja";
+"use client";
 import { Calendar } from "../components/Calendar";
 import { Routes } from "../components/Routes";
-import fs from "fs/promises";
-import iconv from "iconv-lite";
-
-dayjs.locale("ja");
+import { handleSubmit } from "./actions";
+import Encoding from "encoding-japanese";
 
 export default function Home(props: {
   searchParams: {
@@ -19,59 +16,29 @@ export default function Home(props: {
     days: string[];
   };
 }) {
-  async function handleSubmit(formData: FormData) {
-    "use server";
-
-    const year = formData.get("year") as string;
-    const month = formData.get("month") as string;
-    const days = formData.getAll("days") as string[];
-    const from = formData.getAll("from") as string[];
-    const to = formData.getAll("to") as string[];
-    const amount = formData.getAll("amount") as string[];
-
-    console.log(from);
-
-    const result = days
-      .map((day) => {
-        return from
-          .map((_, routeIndex) => {
-            return [
-              dayjs(`${year}-${month}-${day}`).format("YYYY/MM/DD"),
-              "s",
-              "s",
-              from[routeIndex],
-              "s",
-              "s",
-              to[routeIndex],
-              amount[routeIndex],
-              "s",
-              "s",
-              "s",
-            ].join(",");
-          })
-          .flat();
-      })
-      .flat()
-      .join("\n");
-
-    const filePath = "./data.csv";
-    const data = [
-      "allocation_date",
-      "9999/12/31,定期,この行は読み込まれません",
-      result,
-    ].join("\n");
-
-    const buf = iconv.encode(data, "Shift_JIS");
-    fs.writeFile(filePath, buf);
-  }
-
   return (
     <main className="p-24">
       <header className="mb-12">
         <h1 className="text-6xl font-bold text-center">Kyomucan WebUI</h1>
       </header>
 
-      <form action={handleSubmit}>
+      <form
+        action={async (formData) => {
+          const csvData = await handleSubmit(formData);
+
+          const codes = Encoding.stringToCode(csvData);
+          const shiftJisCodeList = Encoding.convert(codes, "SJIS", "UNICODE");
+
+          const blob = new Blob([new Uint8Array(shiftJisCodeList)], {
+            type: "text/csv;charset=Shift_JIS",
+          });
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "kyomucan.csv";
+          link.click();
+        }}
+      >
         <div className="mb-8">
           <Calendar />
         </div>
