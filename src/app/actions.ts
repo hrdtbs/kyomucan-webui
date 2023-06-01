@@ -4,6 +4,29 @@ import "dayjs/locale/ja";
 
 dayjs.locale("ja");
 
+const rowTemplate = (
+  from: string,
+  to: string,
+  amount: string,
+  year: string,
+  month: string,
+  day: string
+) => {
+  return [
+    dayjs(`${year}-${month}-${day}`).format("YYYY/MM/DD"),
+    "s",
+    "s",
+    from,
+    "s",
+    "s",
+    to,
+    amount,
+    "s",
+    "s",
+    "s",
+  ].join(",");
+};
+
 export async function handleSubmit(formData: FormData) {
   const year = formData.get("year") as string;
   const month = formData.get("month") as string;
@@ -16,23 +39,29 @@ export async function handleSubmit(formData: FormData) {
 
   const result = days
     .map((day) => {
-      return from
-        .map((_, routeIndex) => {
-          return [
-            dayjs(`${year}-${month}-${day}`).format("YYYY/MM/DD"),
-            "s",
-            "s",
-            from[routeIndex],
-            "s",
-            "s",
-            to[routeIndex],
-            amount[routeIndex],
-            "s",
-            "s",
-            "s",
-          ].join(",");
-        })
-        .flat();
+      return [
+        ...from.map((_, index) => {
+          return rowTemplate(
+            from[index],
+            to[index],
+            amount[index],
+            year,
+            month,
+            day
+          );
+        }),
+        ...from.map((_, routeIndex) => {
+          const index = from.length - routeIndex - 1;
+          return rowTemplate(
+            to[index],
+            from[index],
+            amount[index],
+            year,
+            month,
+            day
+          );
+        }),
+      ].flat();
     })
     .flat()
     .join("\n");

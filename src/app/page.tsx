@@ -17,7 +17,7 @@ export default function Home(props: {
   };
 }) {
   return (
-    <main className="p-24">
+    <main className="p-6 md:p-24">
       <header className="mb-12">
         <h1 className="text-6xl font-bold text-center">Kyomucan WebUI</h1>
       </header>

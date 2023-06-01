@@ -4,7 +4,7 @@ import { useState } from "react";
 export const Routes = (props: {
   routes: { from: string; to: string; amount: string }[];
 }) => {
-  const [routesCount, setRouteCount] = useState(props.routes.length || 2);
+  const [routesCount, setRouteCount] = useState(props.routes.length || 1);
   return (
     <div>
       <div className="grid gap-6 mb-6 md:grid-cols-3">
